@@ -1,55 +1,52 @@
 pipeline {
     agent any
-	
-	  tools
-    {
-       maven "Maven"
-    }
- stages {
+    stages {
       stage('checkout') {
-           steps {
-             
-                git branch: 'master', url: 'https://github.com/HemaSahuRathore/CI-CD-using-Docker.git'
+           steps {             
+                git credentialsId: '01b0261b-cbbc-4129-afa7-635e874f892d', url: 'https://github.com/Geetha699/CI-CD-using-Docker.git'
              
           }
         }
-	 stage('Execute Maven') {
+      stage('Execute maven') {
            steps {
              
                 sh 'mvn package'             
           }
         }
-        
-
-  stage('Docker Build and Tag') {
-           steps {
-              
-                sh 'docker build -t samplewebapp:latest .' 
-                sh 'docker tag samplewebapp hemasahur/samplewebapp:latest'
-                
-               
-          }
-        }
-     
-  stage('Publish image to Docker Hub') {
-          
+         stage('War-file-Copy') {
             steps {
-        withDockerRegistry([ credentialsId: "DockerHub", url: "" ]) {
-          sh  'docker push hemasahur/samplewebapp:latest'
+               sshagent(['1234']) {
+               sh "scp -r -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/Jenkins-dockerDemo/[!.]* ubuntu@172.31.23.168:~/"
+             }
+         }
+      }
+        stage ('Docker Image Build') {
+            steps {
+            sshagent (['1234']){
+               sh 'ssh ubuntu@172.31.23.168 "bash /home/ubuntu/scripts/dockerbuild.sh"'
+               }         
+            }            
         }
-                  
-          }
-        }
-     
-      stage('Run Docker container on Jenkins Agent') {
-             
-            steps 
-			{
-                sh "docker run -d -p 8003:8080 hemasahur/samplewebapp"
- 
-            }
-        }
- 
-    }
-	}
+            
+  stage('Publish image to Docker Hub') {
     
+            steps {
+            sshagent (['1234']){    
+         sh 'ssh ubuntu@172.31.23.168 "bash /home/ubuntu/scripts/dockerpush.sh"'
+        }
+            }
+  }
+  stage ('Deploy') {
+         
+            steps {
+		 sshagent(['1234']) {
+                        sh 'ssh ubuntu@172.31.23.168 "sh /home/ubuntu/scripts/dockerrun.sh"'
+          }
+        }   
+      }
+
+
+}
+}
+
+
