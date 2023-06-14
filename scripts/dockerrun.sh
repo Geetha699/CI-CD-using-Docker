@@ -1,3 +1,2 @@
-sudo docker pull hemasahur/samplejavaapp:latest
-sudo docker rm -f javaapplication
-sudo docker run --name javaapplication -itd -p 8003:8080 hemasahur/samplejavaapp:latest
+sudo docker pull geethashreems56/dockerjenkinsdemo:javaapp-v1
+sudo docker run --name javaapplicationcontainer -itd -p 8080:8080 geethashreems56/dockerjenkinsdemo:javaapp-v1
