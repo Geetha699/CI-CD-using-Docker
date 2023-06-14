@@ -4,7 +4,6 @@ pipeline {
       stage('checkout') {
            steps {             
                 git credentialsId: '01b0261b-cbbc-4129-afa7-635e874f892d', url: 'https://github.com/Geetha699/CI-CD-using-Docker.git'
-             
           }
         }
       stage('Execute maven') {
